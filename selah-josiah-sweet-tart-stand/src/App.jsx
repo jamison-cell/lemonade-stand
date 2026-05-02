@@ -23,40 +23,6 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [saveStatus, setSaveStatus] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [activeMoneyField, setActiveMoneyField] = useState(null);
-
-  const getMoneyFieldValue = (field) => {
-    if (field === "tip") return tip;
-    if (field === "donation") return donation;
-    if (field === "cash") return cashReceived;
-    return 0;
-  };
-
-  const setMoneyFieldValue = (field, value) => {
-    if (field === "tip") setTip(value);
-    if (field === "donation") setDonation(value);
-    if (field === "cash") setCashReceived(value);
-  };
-
-  const appendNumberPadValue = (value) => {
-    if (!activeMoneyField) return;
-    const current = String(getMoneyFieldValue(activeMoneyField) || "");
-    if (value === "." && current.includes(".")) return;
-    const next = current === "0" && value !== "." ? value : `${current}${value}`;
-    setMoneyFieldValue(activeMoneyField, next);
-  };
-
-  const backspaceNumberPadValue = () => {
-    if (!activeMoneyField) return;
-    const current = String(getMoneyFieldValue(activeMoneyField) || "");
-    const next = current.slice(0, -1);
-    setMoneyFieldValue(activeMoneyField, next || 0);
-  };
-
-  const clearNumberPadValue = () => {
-    if (!activeMoneyField) return;
-    setMoneyFieldValue(activeMoneyField, 0);
-  };
 
   const itemsTotal = useMemo(() => {
     return PRODUCTS.reduce((sum, item) => sum + cart[item.id] * item.price, 0);
@@ -212,23 +178,31 @@ function App() {
               <div className="field-grid">
                 <label>
                   <span>Tip</span>
-                  <button
-                    type="button"
-                    className={`money-display ${activeMoneyField === "tip" ? "active" : ""}`}
-                    onClick={() => setActiveMoneyField("tip")}
-                  >
-                    {money(tip)}
-                  </button>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.25"
+                    value={tip === 0 ? "" : tip}
+                    placeholder="0"
+                    onFocus={() => tip === 0 && setTip("")}
+                    onBlur={() => tip === "" && setTip(0)}
+                    onChange={(e) => setTip(e.target.value)}
+                  />
                 </label>
                 <label>
                   <span>Still Water Donation</span>
-                  <button
-                    type="button"
-                    className={`money-display ${activeMoneyField === "donation" ? "active" : ""}`}
-                    onClick={() => setActiveMoneyField("donation")}
-                  >
-                    {money(donation)}
-                  </button>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.25"
+                    value={donation === 0 ? "" : donation}
+                    placeholder="0"
+                    onFocus={() => donation === 0 && setDonation("")}
+                    onBlur={() => donation === "" && setDonation(0)}
+                    onChange={(e) => setDonation(e.target.value)}
+                  />
                 </label>
               </div>
 
@@ -253,38 +227,23 @@ function App() {
               {paymentMethod === "Cash" ? (
                 <label>
                   <span>Cash Received</span>
-                  <button
-                    type="button"
-                    className={`money-display cash-display ${activeMoneyField === "cash" ? "active" : ""}`}
-                    onClick={() => setActiveMoneyField("cash")}
-                  >
-                    {money(cashReceived)}
-                  </button>
+                  <input
+                    className="cash-input"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="0.25"
+                    value={cashReceived === 0 ? "" : cashReceived}
+                    placeholder="0"
+                    onFocus={() => cashReceived === 0 && setCashReceived("")}
+                    onBlur={() => cashReceived === "" && setCashReceived(0)}
+                    onChange={(e) => setCashReceived(e.target.value)}
+                  />
                 </label>
               ) : (
                 <div className="venmo-box">
                   <p>Venmo Selected</p>
                   <strong>Collect {money(grandTotal)} in Venmo</strong>
-                </div>
-              )}
-
-              {activeMoneyField && (
-                <div className="number-pad">
-                  <p>
-                    Enter {activeMoneyField === "tip" ? "Tip" : activeMoneyField === "donation" ? "Still Water Donation" : "Cash Received"}
-                  </p>
-                  <div className="number-pad-grid">
-                    {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((key) => (
-                      <button key={key} type="button" className="number-key" onClick={() => appendNumberPadValue(key)}>
-                        {key}
-                      </button>
-                    ))}
-                    <button type="button" className="number-key" onClick={backspaceNumberPadValue}>⌫</button>
-                  </div>
-                  <div className="number-pad-actions">
-                    <button type="button" className="btn outline" onClick={clearNumberPadValue}>Clear</button>
-                    <button type="button" className="btn green" onClick={() => setActiveMoneyField(null)}>Done</button>
-                  </div>
                 </div>
               )}
 

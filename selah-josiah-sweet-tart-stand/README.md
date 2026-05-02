@@ -40,7 +40,7 @@ A kid-friendly lemonade stand checkout app.
 
 ## Latest version includes
 
-- Custom number pad for Tip, Still Water Donation, and Cash Received
+- Number fields clear the 0 when tapped
 - Duplicate Save Sale protection
 - Cha-ching sound on saved sale
 - Total Raised Today
