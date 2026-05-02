@@ -37,3 +37,11 @@ A kid-friendly lemonade stand checkout app.
 - Total Raised Today display
 - 10/20 Challenge donation thermometer
 - Tracks Still Water donations toward $200 goal
+
+## Latest version includes
+
+- Custom number pad for Tip, Still Water Donation, and Cash Received
+- Duplicate Save Sale protection
+- Cha-ching sound on saved sale
+- Total Raised Today
+- 10/20 Challenge thermometer

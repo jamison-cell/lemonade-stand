@@ -22,6 +22,41 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [transactions, setTransactions] = useState([]);
   const [saveStatus, setSaveStatus] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeMoneyField, setActiveMoneyField] = useState(null);
+
+  const getMoneyFieldValue = (field) => {
+    if (field === "tip") return tip;
+    if (field === "donation") return donation;
+    if (field === "cash") return cashReceived;
+    return 0;
+  };
+
+  const setMoneyFieldValue = (field, value) => {
+    if (field === "tip") setTip(value);
+    if (field === "donation") setDonation(value);
+    if (field === "cash") setCashReceived(value);
+  };
+
+  const appendNumberPadValue = (value) => {
+    if (!activeMoneyField) return;
+    const current = String(getMoneyFieldValue(activeMoneyField) || "");
+    if (value === "." && current.includes(".")) return;
+    const next = current === "0" && value !== "." ? value : `${current}${value}`;
+    setMoneyFieldValue(activeMoneyField, next);
+  };
+
+  const backspaceNumberPadValue = () => {
+    if (!activeMoneyField) return;
+    const current = String(getMoneyFieldValue(activeMoneyField) || "");
+    const next = current.slice(0, -1);
+    setMoneyFieldValue(activeMoneyField, next || 0);
+  };
+
+  const clearNumberPadValue = () => {
+    if (!activeMoneyField) return;
+    setMoneyFieldValue(activeMoneyField, 0);
+  };
 
   const itemsTotal = useMemo(() => {
     return PRODUCTS.reduce((sum, item) => sum + cart[item.id] * item.price, 0);
@@ -48,8 +83,17 @@ function App() {
     setSaveStatus("");
   };
 
+  const playChaChing = () => {
+    try {
+      const sound = new Audio("https://actions.google.com/sounds/v1/cash_register/cash_register.ogg");
+      sound.volume = 0.8;
+      sound.play().catch(() => {});
+    } catch (error) {}
+  };
+
   const saveTransaction = async () => {
-    if (grandTotal <= 0) return;
+    if (grandTotal <= 0 || isSaving) return;
+    setIsSaving(true);
 
     const orderItems = PRODUCTS
       .filter((item) => cart[item.id] > 0)
@@ -70,6 +114,7 @@ function App() {
     };
 
     setTransactions((current) => [transaction, ...current]);
+    playChaChing();
 
     try {
       setSaveStatus("Saving to Google...");
@@ -89,6 +134,7 @@ function App() {
     setDonation(0);
     setCashReceived(0);
     setPaymentMethod("Cash");
+    setIsSaving(false);
   };
 
   const totals = useMemo(() => {
@@ -166,11 +212,23 @@ function App() {
               <div className="field-grid">
                 <label>
                   <span>Tip</span>
-                  <input type="number" min="0" step="0.25" value={tip} onChange={(e) => setTip(e.target.value)} />
+                  <button
+                    type="button"
+                    className={`money-display ${activeMoneyField === "tip" ? "active" : ""}`}
+                    onClick={() => setActiveMoneyField("tip")}
+                  >
+                    {money(tip)}
+                  </button>
                 </label>
                 <label>
                   <span>Still Water Donation</span>
-                  <input type="number" min="0" step="0.25" value={donation} onChange={(e) => setDonation(e.target.value)} />
+                  <button
+                    type="button"
+                    className={`money-display ${activeMoneyField === "donation" ? "active" : ""}`}
+                    onClick={() => setActiveMoneyField("donation")}
+                  >
+                    {money(donation)}
+                  </button>
                 </label>
               </div>
 
@@ -195,19 +253,38 @@ function App() {
               {paymentMethod === "Cash" ? (
                 <label>
                   <span>Cash Received</span>
-                  <input
-                    className="cash-input"
-                    type="number"
-                    min="0"
-                    step="0.25"
-                    value={cashReceived}
-                    onChange={(e) => setCashReceived(e.target.value)}
-                  />
+                  <button
+                    type="button"
+                    className={`money-display cash-display ${activeMoneyField === "cash" ? "active" : ""}`}
+                    onClick={() => setActiveMoneyField("cash")}
+                  >
+                    {money(cashReceived)}
+                  </button>
                 </label>
               ) : (
                 <div className="venmo-box">
                   <p>Venmo Selected</p>
                   <strong>Collect {money(grandTotal)} in Venmo</strong>
+                </div>
+              )}
+
+              {activeMoneyField && (
+                <div className="number-pad">
+                  <p>
+                    Enter {activeMoneyField === "tip" ? "Tip" : activeMoneyField === "donation" ? "Still Water Donation" : "Cash Received"}
+                  </p>
+                  <div className="number-pad-grid">
+                    {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"].map((key) => (
+                      <button key={key} type="button" className="number-key" onClick={() => appendNumberPadValue(key)}>
+                        {key}
+                      </button>
+                    ))}
+                    <button type="button" className="number-key" onClick={backspaceNumberPadValue}>⌫</button>
+                  </div>
+                  <div className="number-pad-actions">
+                    <button type="button" className="btn outline" onClick={clearNumberPadValue}>Clear</button>
+                    <button type="button" className="btn green" onClick={() => setActiveMoneyField(null)}>Done</button>
+                  </div>
                 </div>
               )}
 
@@ -238,8 +315,8 @@ function App() {
                 <button className="btn outline" onClick={resetOrder}>
                   <RotateCcw size={22} /> Clear
                 </button>
-                <button className="btn green" onClick={saveTransaction} disabled={grandTotal <= 0}>
-                  Save Sale
+                <button className="btn green" onClick={saveTransaction} disabled={grandTotal <= 0 || isSaving}>
+                  {isSaving ? "Saving..." : "Save Sale"}
                 </button>
               </div>
 

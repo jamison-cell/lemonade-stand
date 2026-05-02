@@ -474,3 +474,65 @@ td {
   font-size: 14px;
   font-weight: 1000;
 }
+
+.money-display {
+  width: 100%;
+  min-height: 52px;
+  border: 2px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-size: 20px;
+  font-weight: 1000;
+  background: white;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+}
+
+.money-display.active {
+  border-color: #eab308;
+  box-shadow: 0 0 0 4px #fef3c7;
+}
+
+.cash-display {
+  min-height: 62px;
+  font-size: 30px;
+}
+
+.number-pad {
+  background: #f1f5f9;
+  border-radius: 24px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.number-pad p {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 1000;
+  color: #334155;
+}
+
+.number-pad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.number-key {
+  min-height: 58px;
+  border-radius: 18px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-size: 28px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.number-pad-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
